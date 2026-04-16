@@ -6,702 +6,480 @@
 <title>Pinpoint Partners — CRM</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg: #07070C;
-    --surface: #10101A;
-    --surface2: #16161F;
-    --border: rgba(255,255,255,0.07);
-    --gold: #C9A84C;
-    --gold-dim: rgba(201,168,76,0.15);
-    --gold-border: rgba(201,168,76,0.3);
-    --text: #E8E6E0;
-    --text-muted: #6B6875;
-    --text-soft: #9E9AA8;
-    --replied: #2ECC71;
-    --replied-bg: rgba(46,204,113,0.12);
-    --no-reply: #E74C3C;
-    --no-reply-bg: rgba(231,76,60,0.12);
-    --equities: #4A9EFF;
-    --fixed: #F39C12;
-    --both: #9B59B6;
-    --radius: 10px;
-    --radius-sm: 6px;
-  }
-
-  html { font-size: 14px; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
-    min-height: 100vh;
-    line-height: 1.5;
-  }
-
-  /* HEADER */
-  header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 32px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    backdrop-filter: blur(12px);
-  }
-
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .logo-mark {
-    width: 32px;
-    height: 32px;
-    background: var(--gold);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 14px;
-    color: #07070C;
-    letter-spacing: -0.5px;
-  }
-
-  .logo-text {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text);
-    letter-spacing: -0.3px;
-  }
-
-  .logo-sub {
-    font-size: 11px;
-    color: var(--text-muted);
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-  }
-
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .sync-status {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: var(--text-muted);
-  }
-
-  .sync-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--replied);
-    box-shadow: 0 0 6px var(--replied);
-  }
-
-  .btn-add {
-    background: var(--gold);
-    color: #07070C;
-    border: none;
-    padding: 7px 16px;
-    border-radius: var(--radius-sm);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity 0.15s;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .btn-add:hover { opacity: 0.85; }
-
-  /* MAIN */
-  main {
-    max-width: 1440px;
-    margin: 0 auto;
-    padding: 28px 32px;
-  }
-
-  /* KPI CARDS */
-  .kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 12px;
-    margin-bottom: 24px;
-  }
-
-  .kpi-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px 20px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .kpi-card.highlight {
-    border-color: var(--gold-border);
-    background: linear-gradient(135deg, var(--surface) 0%, rgba(201,168,76,0.05) 100%);
-  }
-
-  .kpi-label {
-    font-size: 11px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-bottom: 8px;
-  }
-
-  .kpi-value {
-    font-size: 28px;
-    font-weight: 700;
-    letter-spacing: -1px;
-    color: var(--text);
-    line-height: 1;
-  }
-
-  .kpi-card.highlight .kpi-value {
-    color: var(--gold);
-  }
-
-  .kpi-sub {
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-top: 4px;
-  }
-
-  .kpi-bar {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    height: 2px;
-    background: var(--gold);
-    transition: width 0.8s ease;
-  }
-
-  /* TOOLBAR */
-  .toolbar {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 16px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-
-  .search-wrap {
-    position: relative;
-    flex: 1;
-    min-width: 220px;
-  }
-
-  .search-icon {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-muted);
-    pointer-events: none;
-    font-size: 14px;
-  }
-
-  .search-input {
-    width: 100%;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 8px 12px 8px 36px;
-    color: var(--text);
-    font-size: 13px;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-
-  .search-input:focus { border-color: var(--gold-border); }
-  .search-input::placeholder { color: var(--text-muted); }
-
-  .filter-select {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 8px 12px;
-    color: var(--text);
-    font-size: 13px;
-    outline: none;
-    cursor: pointer;
-    transition: border-color 0.15s;
-    appearance: none;
-    padding-right: 28px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236B6875' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-  }
-
-  .filter-select:focus { border-color: var(--gold-border); }
-
-  .filter-select option { background: #1A1A24; }
-
-  .btn-ghost {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 8px 14px;
-    color: var(--text-soft);
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.15s;
-    white-space: nowrap;
-  }
-
-  .btn-ghost:hover { border-color: var(--gold-border); color: var(--text); }
-
-  .count-badge {
-    background: var(--gold-dim);
-    color: var(--gold);
-    border: 1px solid var(--gold-border);
-    border-radius: 20px;
-    padding: 2px 10px;
-    font-size: 12px;
-    font-weight: 600;
-    margin-left: auto;
-  }
-
-  /* TABLE */
-  .table-wrap {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  thead tr {
-    background: var(--surface2);
-    border-bottom: 1px solid var(--border);
-  }
-
-  th {
-    padding: 10px 14px;
-    text-align: left;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    white-space: nowrap;
-    cursor: pointer;
-    user-select: none;
-    transition: color 0.15s;
-  }
-
-  th:hover { color: var(--text); }
-
-  th.sort-asc::after { content: ' ↑'; color: var(--gold); }
-  th.sort-desc::after { content: ' ↓'; color: var(--gold); }
-
-  tbody tr {
-    border-bottom: 1px solid rgba(255,255,255,0.04);
-    transition: background 0.1s;
-    cursor: pointer;
-  }
-
-  tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: rgba(255,255,255,0.03); }
-
-  td {
-    padding: 10px 14px;
-    font-size: 13px;
-    color: var(--text);
-    white-space: nowrap;
-  }
-
-  .td-name {
-    font-weight: 500;
-  }
-
-  .td-email {
-    color: var(--text-soft);
-    font-size: 12px;
-  }
-
-  .td-email a {
-    color: inherit;
-    text-decoration: none;
-  }
-
-  .td-email a:hover { color: var(--gold); }
-
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.3px;
-  }
-
-  .badge-replied { background: var(--replied-bg); color: var(--replied); }
-  .badge-no-reply { background: var(--no-reply-bg); color: var(--no-reply); }
-
-  .badge-equities { background: rgba(74,158,255,0.12); color: var(--equities); }
-  .badge-fixed { background: rgba(243,156,18,0.12); color: var(--fixed); }
-  .badge-both { background: rgba(155,89,182,0.12); color: var(--both); }
-
-  .badge-client { background: rgba(201,168,76,0.12); color: var(--gold); }
-  .badge-prospect { background: rgba(255,255,255,0.06); color: var(--text-muted); }
-
-  .bank-chip {
-    display: inline-block;
-    background: rgba(255,255,255,0.06);
-    border-radius: 4px;
-    padding: 2px 7px;
-    font-size: 12px;
-    font-weight: 500;
-  }
-
-  .date-cell { color: var(--text-soft); font-size: 12px; }
-
-  .follow-up {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 12px;
-    color: var(--text-soft);
-  }
-
-  .follow-up.active { color: var(--gold); }
-
-  /* PAGINATION */
-  .table-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
-    border-top: 1px solid var(--border);
-    background: var(--surface2);
-  }
-
-  .page-info { font-size: 12px; color: var(--text-muted); }
-
-  .page-btns { display: flex; gap: 6px; }
-
-  .page-btn {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 5px 10px;
-    color: var(--text-soft);
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .page-btn:hover:not(:disabled) { border-color: var(--gold-border); color: var(--text); }
-  .page-btn:disabled { opacity: 0.3; cursor: default; }
-  .page-btn.active { background: var(--gold-dim); border-color: var(--gold-border); color: var(--gold); }
-
-  /* BANK SUMMARY */
-  .section-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-soft);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin: 28px 0 12px;
-  }
-
-  .bank-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 8px;
-    margin-bottom: 32px;
-  }
-
-  .bank-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 12px 14px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .bank-card:hover, .bank-card.active {
-    border-color: var(--gold-border);
-    background: var(--gold-dim);
-  }
-
-  .bank-name {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 4px;
-  }
-
-  .bank-stats {
-    display: flex;
-    gap: 8px;
-    font-size: 11px;
-    color: var(--text-muted);
-  }
-
-  .bank-stats span { display: flex; align-items: center; gap: 3px; }
-
-  /* MODAL */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
-    z-index: 200;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    backdrop-filter: blur(4px);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s;
-  }
-
-  .modal-overlay.open {
-    opacity: 1;
-    pointer-events: all;
-  }
-
-  .modal {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    width: 100%;
-    max-width: 520px;
-    max-height: 90vh;
-    overflow-y: auto;
-    transform: translateY(10px);
-    transition: transform 0.2s;
-  }
-
-  .modal-overlay.open .modal {
-    transform: translateY(0);
-  }
-
-  .modal-header {
-    padding: 20px 24px 16px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .modal-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--text);
-  }
-
-  .modal-subtitle {
-    font-size: 13px;
-    color: var(--text-muted);
-    margin-top: 2px;
-  }
-
-  .btn-close {
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    font-size: 20px;
-    cursor: pointer;
-    line-height: 1;
-    padding: 4px;
-  }
-
-  .btn-close:hover { color: var(--text); }
-
-  .modal-body {
-    padding: 20px 24px;
-    display: grid;
-    gap: 14px;
-  }
-
-  .field-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-
-  .field.full { grid-column: 1 / -1; }
-
-  label {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-  }
-
-  .field input, .field select, .field textarea {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 8px 11px;
-    color: var(--text);
-    font-size: 13px;
-    outline: none;
-    transition: border-color 0.15s;
-    font-family: inherit;
-  }
-
-  .field input:focus, .field select:focus, .field textarea:focus {
-    border-color: var(--gold-border);
-  }
-
-  .field textarea { resize: vertical; min-height: 80px; }
-
-  .field select option { background: #1A1A24; }
-
-  .modal-footer {
-    padding: 16px 24px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .btn-delete {
-    background: rgba(231,76,60,0.12);
-    border: 1px solid rgba(231,76,60,0.25);
-    color: var(--no-reply);
-    border-radius: var(--radius-sm);
-    padding: 8px 14px;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .btn-delete:hover { background: rgba(231,76,60,0.2); }
-
-  .btn-save {
-    background: var(--gold);
-    border: none;
-    color: #07070C;
-    border-radius: var(--radius-sm);
-    padding: 8px 20px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity 0.15s;
-    margin-left: auto;
-  }
-
-  .btn-save:hover { opacity: 0.85; }
-
-  .btn-cancel {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--text-muted);
-    border-radius: var(--radius-sm);
-    padding: 8px 14px;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .btn-cancel:hover { border-color: var(--text-muted); color: var(--text); }
-
-  /* LOADING */
-  .loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 60px;
-    color: var(--text-muted);
-    gap: 10px;
-  }
-
-  .spinner {
-    width: 18px;
-    height: 18px;
-    border: 2px solid var(--border);
-    border-top-color: var(--gold);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .empty {
-    text-align: center;
-    padding: 60px;
-    color: var(--text-muted);
-    font-size: 13px;
-  }
-
-  /* TOAST */
-  .toast-container {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    z-index: 999;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .toast {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 10px 16px;
-    font-size: 13px;
-    color: var(--text);
-    animation: slideIn 0.2s ease;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
-  }
-
-  .toast.success { border-color: rgba(46,204,113,0.3); color: var(--replied); }
-  .toast.error { border-color: rgba(231,76,60,0.3); color: var(--no-reply); }
-
-  @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-
-  /* SCROLLBAR */
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
-
-  /* RESPONSIVE */
-  @media (max-width: 900px) {
-    .kpi-grid { grid-template-columns: repeat(3, 1fr); }
-    main { padding: 20px 16px; }
-    header { padding: 0 16px; }
-  }
-
-  @media (max-width: 600px) {
-    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-  }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #EEF1F8;
+  --surface:   #FFFFFF;
+  --surface2:  #F6F8FC;
+  --border:    #E2E6F0;
+  --border2:   #CDD3E2;
+  --navy:      #1A2B52;
+  --navy-soft: rgba(26,43,82,0.08);
+  --gold:      #B8940A;
+  --gold-bg:   rgba(184,148,10,0.08);
+  --gold-b:    rgba(184,148,10,0.25);
+  --text:      #0E1629;
+  --text-2:    #3D4A68;
+  --text-3:    #7B88A8;
+  --replied:   #0A8C6B;
+  --replied-bg:#E8F7F3;
+  --amber:     #C07A00;
+  --amber-bg:  #FEF3E2;
+  --eq:        #1A6EBD;
+  --eq-bg:     #EBF3FD;
+  --fi:        #7B3DBD;
+  --fi-bg:     #F3ECFD;
+  --both:      #2D6E4E;
+  --both-bg:   #EAF5EF;
+  --red:       #C0392B;
+  --red-bg:    #FDECEA;
+  --r: 10px; --rs: 6px;
+  --shadow: 0 1px 4px rgba(14,22,41,0.07), 0 4px 16px rgba(14,22,41,0.04);
+  --shadow-md: 0 4px 12px rgba(14,22,41,0.1), 0 12px 40px rgba(14,22,41,0.08);
+}
+
+html { font-size: 14px; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* ── HEADER ── */
+header {
+  background: var(--navy);
+  padding: 0 28px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo { display: flex; align-items: center; gap: 12px; }
+
+.logo-mark {
+  width: 30px; height: 30px;
+  background: var(--gold);
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 13px; color: #fff;
+  letter-spacing: -0.5px;
+}
+
+.logo-name { font-size: 15px; font-weight: 700; color: #fff; letter-spacing: -0.3px; }
+.logo-role { font-size: 11px; color: rgba(255,255,255,0.45); letter-spacing: 0.4px; }
+
+.header-right { display: flex; align-items: center; gap: 12px; }
+
+.sync-pill {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.6);
+}
+
+.sync-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #34D399;
+  box-shadow: 0 0 6px #34D399;
+  flex-shrink: 0;
+}
+
+.sync-dot.syncing { background: var(--gold); box-shadow: 0 0 6px var(--gold); animation: pulse 1s ease-in-out infinite; }
+.sync-dot.error   { background: #F87171; box-shadow: 0 0 6px #F87171; animation: none; }
+
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+.btn-add {
+  background: var(--gold);
+  color: #fff;
+  border: none;
+  padding: 7px 16px;
+  border-radius: var(--rs);
+  font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  transition: filter .15s;
+}
+.btn-add:hover { filter: brightness(1.1); }
+
+/* ── MAIN ── */
+main { max-width: 1440px; margin: 0 auto; padding: 24px 28px; }
+
+/* ── KPIs ── */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.kpi {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px 18px 14px;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi-accent { border-top: 3px solid var(--navy); }
+.kpi-gold   { border-top: 3px solid var(--gold); }
+
+.kpi-label {
+  font-size: 11px; font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  margin-bottom: 8px;
+}
+
+.kpi-val {
+  font-size: 30px; font-weight: 800;
+  color: var(--text);
+  letter-spacing: -1.5px;
+  line-height: 1;
+}
+
+.kpi-accent .kpi-val { color: var(--navy); }
+.kpi-gold   .kpi-val { color: var(--gold); }
+
+.kpi-sub { font-size: 11px; color: var(--text-3); margin-top: 5px; }
+
+.kpi-progress {
+  position: absolute; bottom: 0; left: 0; height: 3px;
+  background: linear-gradient(90deg, var(--gold), #E8B800);
+  transition: width 1s ease;
+}
+
+/* ── SECTION TITLE ── */
+.sec { font-size: 11px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.8px; margin: 20px 0 10px; }
+
+/* ── BANK GRID ── */
+.bank-grid {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-bottom: 20px;
+}
+
+.bank-chip {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 13px;
+  font-size: 12px; font-weight: 500;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all .15s;
+  box-shadow: var(--shadow);
+  display: flex; align-items: center; gap: 6px;
+  white-space: nowrap;
+}
+
+.bank-chip:hover { border-color: var(--navy); color: var(--navy); }
+.bank-chip.active { background: var(--navy); border-color: var(--navy); color: #fff; }
+
+.bank-chip .bcount {
+  background: rgba(0,0,0,0.1);
+  border-radius: 10px;
+  padding: 1px 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.bank-chip.active .bcount { background: rgba(255,255,255,0.2); }
+
+/* ── TOOLBAR ── */
+.toolbar {
+  display: flex; gap: 8px; margin-bottom: 12px;
+  align-items: center; flex-wrap: wrap;
+}
+
+.search-wrap { position: relative; flex: 1; min-width: 220px; }
+
+.search-ico {
+  position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+  color: var(--text-3); font-size: 13px; pointer-events: none;
+}
+
+.search {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--rs);
+  padding: 8px 11px 8px 32px;
+  color: var(--text); font-size: 13px;
+  outline: none;
+  box-shadow: var(--shadow);
+  transition: border-color .15s;
+}
+.search:focus { border-color: var(--navy); }
+.search::placeholder { color: var(--text-3); }
+
+.fsel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--rs);
+  padding: 8px 30px 8px 11px;
+  color: var(--text); font-size: 13px;
+  outline: none; cursor: pointer;
+  box-shadow: var(--shadow);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237B88A8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  transition: border-color .15s;
+}
+.fsel:focus { border-color: var(--navy); }
+.fsel option { background: #fff; }
+
+.btn-clear {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--rs); padding: 8px 14px;
+  color: var(--text-3); font-size: 13px;
+  cursor: pointer; transition: all .15s;
+  box-shadow: var(--shadow);
+}
+.btn-clear:hover { border-color: var(--border2); color: var(--text-2); }
+
+.res-badge {
+  background: var(--navy);
+  color: #fff;
+  border-radius: 20px;
+  padding: 3px 11px;
+  font-size: 12px; font-weight: 700;
+  margin-left: auto;
+}
+
+/* ── TABLE ── */
+.tbl-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+table { width: 100%; border-collapse: collapse; }
+
+thead tr { background: var(--surface2); border-bottom: 1px solid var(--border); }
+
+th {
+  padding: 10px 13px;
+  text-align: left;
+  font-size: 11px; font-weight: 700;
+  color: var(--text-3);
+  text-transform: uppercase; letter-spacing: 0.6px;
+  white-space: nowrap; cursor: pointer; user-select: none;
+  transition: color .15s;
+}
+th:hover { color: var(--navy); }
+th.asc::after  { content: ' ↑'; color: var(--gold); }
+th.desc::after { content: ' ↓'; color: var(--gold); }
+
+tbody tr {
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  cursor: pointer;
+  transition: background .1s;
+}
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: #F8F9FD; }
+
+td { padding: 10px 13px; font-size: 13px; color: var(--text); vertical-align: middle; }
+
+.td-name { font-weight: 600; }
+.td-email { font-size: 12px; color: var(--text-3); }
+.td-email a { color: inherit; text-decoration: none; }
+.td-email a:hover { color: var(--navy); text-decoration: underline; }
+
+.td-notes {
+  max-width: 160px;
+  font-size: 12px; color: var(--text-3);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.badge {
+  display: inline-flex; align-items: center;
+  padding: 2px 8px; border-radius: 4px;
+  font-size: 11px; font-weight: 600;
+}
+
+.b-replied   { background: var(--replied-bg); color: var(--replied); }
+.b-noreply   { background: var(--amber-bg);   color: var(--amber); }
+.b-client    { background: var(--eq-bg);       color: var(--eq); }
+.b-prospect  { background: var(--surface2);    color: var(--text-3); border: 1px solid var(--border); }
+.b-eq        { background: var(--eq-bg);       color: var(--eq); }
+.b-fi        { background: var(--fi-bg);       color: var(--fi); }
+.b-both      { background: var(--both-bg);     color: var(--both); }
+
+.bank-tag {
+  display: inline-block;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 4px; padding: 2px 7px;
+  font-size: 12px; font-weight: 500; color: var(--text-2);
+}
+
+.td-date { font-size: 12px; color: var(--text-3); }
+
+.fup {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 12px; font-weight: 600; color: var(--text-3);
+}
+.fup.has { color: var(--navy); }
+
+.inactive-badge {
+  display: inline-flex; align-items: center;
+  padding: 2px 7px; border-radius: 4px;
+  font-size: 11px; font-weight: 600;
+}
+.inactive-hot  { background: var(--red-bg);   color: var(--red); }
+.inactive-warm { background: var(--amber-bg); color: var(--amber); }
+.inactive-ok   { color: var(--text-3); font-size: 11px; }
+
+/* ── TABLE FOOTER ── */
+.tbl-foot {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--surface2);
+}
+.page-info { font-size: 12px; color: var(--text-3); }
+.page-btns { display: flex; gap: 5px; }
+.pbtn {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--rs); padding: 5px 10px;
+  font-size: 12px; color: var(--text-3);
+  cursor: pointer; transition: all .15s;
+}
+.pbtn:hover:not(:disabled) { border-color: var(--navy); color: var(--navy); }
+.pbtn:disabled { opacity: .35; cursor: default; }
+.pbtn.cur { background: var(--navy); border-color: var(--navy); color: #fff; }
+
+/* ── LOADING / EMPTY ── */
+.loading { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 60px; color: var(--text-3); }
+.spinner { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--navy); border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.empty { text-align: center; padding: 60px; color: var(--text-3); font-size: 13px; }
+
+/* ── MODAL ── */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(14,22,41,0.4);
+  z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+  opacity: 0; pointer-events: none;
+  transition: opacity .2s;
+}
+.overlay.open { opacity: 1; pointer-events: all; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  width: 100%; max-width: 520px;
+  max-height: 90vh; overflow-y: auto;
+  box-shadow: var(--shadow-md);
+  transform: translateY(12px);
+  transition: transform .2s;
+}
+.overlay.open .modal { transform: translateY(0); }
+
+.mhd {
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; justify-content: space-between;
+}
+.mtitle { font-size: 16px; font-weight: 700; color: var(--text); }
+.msub   { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+.mclose { background: none; border: none; color: var(--text-3); font-size: 18px; cursor: pointer; line-height: 1; padding: 2px 4px; }
+.mclose:hover { color: var(--text); }
+
+.mbody { padding: 18px 22px; display: grid; gap: 13px; }
+.frow { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field.full { grid-column: 1/-1; }
+
+label { font-size: 11px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.6px; }
+
+.field input, .field select, .field textarea {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--rs);
+  padding: 8px 11px;
+  color: var(--text); font-size: 13px;
+  outline: none; font-family: inherit;
+  transition: border-color .15s;
+}
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--navy); }
+.field textarea { resize: vertical; min-height: 80px; }
+.field select option { background: #fff; }
+
+.mfoot {
+  padding: 14px 22px;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface2);
+  border-radius: 0 0 14px 14px;
+}
+.btn-del {
+  background: var(--red-bg); border: 1px solid rgba(192,57,43,0.2);
+  color: var(--red); border-radius: var(--rs);
+  padding: 8px 14px; font-size: 13px; cursor: pointer; transition: all .15s;
+}
+.btn-del:hover { background: rgba(192,57,43,0.15); }
+.btn-can {
+  background: none; border: 1px solid var(--border);
+  color: var(--text-3); border-radius: var(--rs);
+  padding: 8px 14px; font-size: 13px; cursor: pointer; margin-left: auto; transition: all .15s;
+}
+.btn-can:hover { border-color: var(--border2); color: var(--text); }
+.btn-sav {
+  background: var(--navy); border: none;
+  color: #fff; border-radius: var(--rs);
+  padding: 8px 20px; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: filter .15s;
+}
+.btn-sav:hover { filter: brightness(1.15); }
+
+/* ── TOASTS ── */
+.toasts {
+  position: fixed; bottom: 20px; right: 20px;
+  z-index: 999; display: flex; flex-direction: column; gap: 7px;
+}
+.toast {
+  background: var(--navy); color: #fff;
+  border-radius: var(--rs); padding: 10px 16px;
+  font-size: 13px; box-shadow: var(--shadow-md);
+  animation: tin .2s ease;
+}
+.toast.ok  { background: var(--replied); }
+.toast.err { background: var(--red); }
+@keyframes tin { from{transform:translateX(16px);opacity:0} to{transform:none;opacity:1} }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px) {
+  .kpi-row { grid-template-columns: repeat(3,1fr); }
+  main { padding: 16px; }
+  header { padding: 0 16px; }
+}
+@media(max-width:600px) {
+  .kpi-row { grid-template-columns: repeat(2,1fr); }
+}
 </style>
 </head>
 <body>
@@ -710,560 +488,465 @@
   <div class="logo">
     <div class="logo-mark">PP</div>
     <div>
-      <div class="logo-text">Pinpoint Partners</div>
-      <div class="logo-sub">CRM — Global Markets & Hedge Funds</div>
+      <div class="logo-name">Pinpoint Partners</div>
+      <div class="logo-role">Global Markets & Hedge Funds — CRM</div>
     </div>
   </div>
   <div class="header-right">
-    <div class="sync-status">
+    <div class="sync-pill">
       <div class="sync-dot" id="syncDot"></div>
       <span id="syncLabel">Live</span>
     </div>
     <button class="btn-add" onclick="openModal()">
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M5.5 1v9M1 5.5h9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
       Add Contact
     </button>
   </div>
 </header>
 
 <main>
-  <!-- KPI CARDS -->
-  <div class="kpi-grid" id="kpiGrid">
-    <div class="kpi-card highlight">
+
+  <!-- KPIs -->
+  <div class="kpi-row">
+    <div class="kpi kpi-accent">
       <div class="kpi-label">Total Contacts</div>
-      <div class="kpi-value" id="kpiTotal">—</div>
-      <div class="kpi-sub">across all banks</div>
-      <div class="kpi-bar" style="width:100%"></div>
+      <div class="kpi-val" id="k0">—</div>
+      <div class="kpi-sub">in database</div>
     </div>
-    <div class="kpi-card">
+    <div class="kpi">
       <div class="kpi-label">Clients</div>
-      <div class="kpi-value" id="kpiClients">—</div>
+      <div class="kpi-val" id="k1">—</div>
       <div class="kpi-sub">active relationships</div>
     </div>
-    <div class="kpi-card">
+    <div class="kpi">
       <div class="kpi-label">Prospects</div>
-      <div class="kpi-value" id="kpiProspects">—</div>
+      <div class="kpi-val" id="k2">—</div>
       <div class="kpi-sub">to convert</div>
     </div>
-    <div class="kpi-card">
+    <div class="kpi kpi-gold">
       <div class="kpi-label">Reply Rate</div>
-      <div class="kpi-value" id="kpiReplyRate">—</div>
-      <div class="kpi-sub" id="kpiRepliedCount">replied</div>
-      <div class="kpi-bar" id="kpiBar" style="width:0%"></div>
+      <div class="kpi-val" id="k3">—</div>
+      <div class="kpi-sub" id="k3sub">replied</div>
+      <div class="kpi-progress" id="kbar" style="width:0%"></div>
     </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Banks Covered</div>
-      <div class="kpi-value" id="kpiBanks">—</div>
-      <div class="kpi-sub">institutions</div>
+    <div class="kpi">
+      <div class="kpi-label">Banks</div>
+      <div class="kpi-val" id="k4">—</div>
+      <div class="kpi-sub">institutions covered</div>
     </div>
   </div>
 
-  <!-- BANK SUMMARY -->
-  <div class="section-title">Banks</div>
+  <!-- Banks -->
+  <div class="sec">Banks</div>
   <div class="bank-grid" id="bankGrid"></div>
 
-  <!-- TOOLBAR -->
+  <!-- Toolbar -->
   <div class="toolbar">
     <div class="search-wrap">
-      <span class="search-icon">🔍</span>
-      <input type="text" class="search-input" id="searchInput" placeholder="Search name, bank, email…">
+      <span class="search-ico">🔍</span>
+      <input class="search" id="q" type="text" placeholder="Search name, bank, email…">
     </div>
-    <select class="filter-select" id="filterCategory">
+    <select class="fsel" id="fCat">
       <option value="">All Categories</option>
       <option value="CLIENTS">Clients</option>
       <option value="PROSPECT">Prospects</option>
     </select>
-    <select class="filter-select" id="filterClassification">
+    <select class="fsel" id="fCls">
       <option value="">All Classes</option>
       <option value="Equities">Equities</option>
       <option value="Fixed Income">Fixed Income</option>
       <option value="Both">Both</option>
     </select>
-    <select class="filter-select" id="filterStatus">
+    <select class="fsel" id="fSt">
       <option value="">All Statuses</option>
       <option value="Replied">Replied</option>
       <option value="No Reply">No Reply</option>
     </select>
-    <select class="filter-select" id="filterBank">
+    <select class="fsel" id="fBank">
       <option value="">All Banks</option>
     </select>
-    <button class="btn-ghost" onclick="clearFilters()">Clear</button>
-    <span class="count-badge" id="countBadge">0</span>
+    <button class="btn-clear" onclick="clearF()">Clear</button>
+    <span class="res-badge" id="resBadge">0</span>
   </div>
 
-  <!-- TABLE -->
-  <div class="table-wrap">
-    <div id="tableLoading" class="loading"><div class="spinner"></div> Loading contacts…</div>
-    <table id="contactsTable" style="display:none">
+  <!-- Table -->
+  <div class="tbl-wrap">
+    <div class="loading" id="tLoad"><div class="spinner"></div>Loading contacts…</div>
+    <table id="tbl" style="display:none">
       <thead>
         <tr>
-          <th onclick="sortBy('bank')">Bank</th>
-          <th onclick="sortBy('first_name')">Name</th>
+          <th onclick="sort('bank')">Bank</th>
+          <th onclick="sort('last_name')">Name</th>
           <th>Email</th>
-          <th onclick="sortBy('category')">Category</th>
-          <th onclick="sortBy('classification')">Class</th>
-          <th onclick="sortBy('reply_status')">Status</th>
-          <th onclick="sortBy('first_contact_date')">First Contact</th>
-          <th onclick="sortBy('last_contact_date')">Last Contact</th>
-          <th onclick="sortBy('nb_follow_ups')">Follow-ups</th>
+          <th onclick="sort('category')">Category</th>
+          <th onclick="sort('classification')">Class</th>
+          <th onclick="sort('reply_status')">Status</th>
+          <th onclick="sort('first_contact_date')">First Contact</th>
+          <th onclick="sort('last_contact_date')">Last Contact</th>
+          <th onclick="sort('nb_follow_ups')">Follow-ups</th>
+          <th>Inactive</th>
+          <th>Notes</th>
         </tr>
       </thead>
-      <tbody id="tableBody"></tbody>
+      <tbody id="tbody"></tbody>
     </table>
-    <div id="tableEmpty" class="empty" style="display:none">No contacts match your filters.</div>
-    <div class="table-footer" id="tableFooter" style="display:none">
-      <span class="page-info" id="pageInfo"></span>
-      <div class="page-btns" id="pageBtns"></div>
+    <div class="empty" id="tEmpty" style="display:none">No contacts match your filters.</div>
+    <div class="tbl-foot" id="tFoot" style="display:none">
+      <span class="page-info" id="pInfo"></span>
+      <div class="page-btns" id="pBtns"></div>
     </div>
   </div>
+
 </main>
 
 <!-- MODAL -->
-<div class="modal-overlay" id="modalOverlay" onclick="e => { if(e.target===this) closeModal(); }">
-  <div class="modal" onclick="event.stopPropagation()">
-    <div class="modal-header">
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="mhd">
       <div>
-        <div class="modal-title" id="modalTitle">Add Contact</div>
-        <div class="modal-subtitle" id="modalSubtitle">New entry</div>
+        <div class="mtitle" id="mtitle">Add Contact</div>
+        <div class="msub"   id="msub">New entry</div>
       </div>
-      <button class="btn-close" onclick="closeModal()">✕</button>
+      <button class="mclose" onclick="closeModal()">✕</button>
     </div>
-    <div class="modal-body">
-      <input type="hidden" id="fieldId">
-      <div class="field-row">
-        <div class="field">
-          <label>First Name *</label>
-          <input type="text" id="fieldFirstName" placeholder="John">
-        </div>
-        <div class="field">
-          <label>Last Name</label>
-          <input type="text" id="fieldLastName" placeholder="Doe">
+    <div class="mbody">
+      <input type="hidden" id="fId">
+      <div class="frow">
+        <div class="field"><label>First Name *</label><input id="fFN" placeholder="John"></div>
+        <div class="field"><label>Last Name</label><input id="fLN" placeholder="Doe"></div>
+      </div>
+      <div class="frow">
+        <div class="field"><label>Bank *</label><input id="fBk" placeholder="Goldman Sachs"></div>
+        <div class="field"><label>Category</label>
+          <select id="fCat2"><option value="CLIENTS">Client</option><option value="PROSPECT">Prospect</option></select>
         </div>
       </div>
-      <div class="field-row">
-        <div class="field">
-          <label>Bank *</label>
-          <input type="text" id="fieldBank" placeholder="Goldman Sachs">
-        </div>
-        <div class="field">
-          <label>Category *</label>
-          <select id="fieldCategory">
-            <option value="CLIENTS">Client</option>
-            <option value="PROSPECT">Prospect</option>
-          </select>
+      <div class="field full"><label>Email</label><input id="fEm" type="email" placeholder="john.doe@bank.com"></div>
+      <div class="frow">
+        <div class="field"><label>Title / Role</label><input id="fTi" placeholder="MD, Head of Sales…"></div>
+        <div class="field"><label>Classification</label>
+          <select id="fCl"><option value="Both">Both</option><option value="Equities">Equities</option><option value="Fixed Income">Fixed Income</option></select>
         </div>
       </div>
-      <div class="field-row">
-        <div class="field full">
-          <label>Email</label>
-          <input type="email" id="fieldEmail" placeholder="john.doe@bank.com">
+      <div class="frow">
+        <div class="field"><label>First Contact</label><input id="fFC" type="date"></div>
+        <div class="field"><label>Last Contact</label><input id="fLC" type="date"></div>
+      </div>
+      <div class="frow">
+        <div class="field"><label>Follow-ups</label><input id="fFU" type="number" value="0" min="0"></div>
+        <div class="field"><label>Reply Status</label>
+          <select id="fRS"><option value="No Reply">No Reply</option><option value="Replied">Replied</option></select>
         </div>
       </div>
-      <div class="field-row">
-        <div class="field">
-          <label>Title / Role</label>
-          <input type="text" id="fieldTitle" placeholder="MD, Head of Sales…">
-        </div>
-        <div class="field">
-          <label>Classification</label>
-          <select id="fieldClassification">
-            <option value="Both">Both</option>
-            <option value="Equities">Equities</option>
-            <option value="Fixed Income">Fixed Income</option>
-          </select>
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label>First Contact Date</label>
-          <input type="date" id="fieldFirstContact">
-        </div>
-        <div class="field">
-          <label>Last Contact Date</label>
-          <input type="date" id="fieldLastContact">
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label>Follow-ups</label>
-          <input type="number" id="fieldFollowUps" value="0" min="0">
-        </div>
-        <div class="field">
-          <label>Reply Status</label>
-          <select id="fieldReplyStatus">
-            <option value="No Reply">No Reply</option>
-            <option value="Replied">Replied</option>
-          </select>
-        </div>
-      </div>
-      <div class="field">
-        <label>Notes</label>
-        <textarea id="fieldNotes" placeholder="Add notes, context, next steps…"></textarea>
-      </div>
+      <div class="field full"><label>Notes</label><textarea id="fNo" placeholder="Notes, context, next steps…"></textarea></div>
     </div>
-    <div class="modal-footer">
-      <button class="btn-delete" id="btnDelete" onclick="deleteContact()" style="display:none">Delete</button>
-      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-      <button class="btn-save" onclick="saveContact()">Save</button>
+    <div class="mfoot">
+      <button class="btn-del" id="btnDel" onclick="delContact()" style="display:none">Delete</button>
+      <button class="btn-can" onclick="closeModal()">Cancel</button>
+      <button class="btn-sav" onclick="saveContact()">Save</button>
     </div>
   </div>
 </div>
 
-<!-- TOASTS -->
-<div class="toast-container" id="toastContainer"></div>
+<div class="toasts" id="toasts"></div>
 
 <script>
-const SUPABASE_URL = 'https://cpluwewweltssrwcqohn.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwbHV3ZXd3ZWx0c3Nyd2Nxb2huIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzNDg5ODMsImV4cCI6MjA5MTkyNDk4M30.WKI-pQe4vzCUA11J96rFBH3V6ECCwcH-phf9ZZyfjAs';
+const SB_URL  = 'https://cpluwewweltssrwcqohn.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwbHV3ZXd3ZWx0c3Nyd2Nxb2huIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzNDg5ODMsImV4cCI6MjA5MTkyNDk4M30.WKI-pQe4vzCUA11J96rFBH3V6ECCwcH-phf9ZZyfjAs';
+const db = supabase.createClient(SB_URL, SB_ANON);
 
-const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_ANON);
+let all = [], filtered = [], sCol = 'bank', sDir = 'asc', pg = 1, bankF = '';
+const PG = 25;
 
-let allContacts = [];
-let filtered = [];
-let sortCol = 'bank';
-let sortDir = 'asc';
-let page = 1;
-const PAGE_SIZE = 25;
-let bankFilter = '';
-
-// ─── INIT ────────────────────────────────────────────────────────────────────
+// ── INIT ──────────────────────────────────────────────────────────────────────
 async function init() {
-  await loadContacts();
+  await load();
   setupFilters();
-  subscribeRealtime();
+  realtime();
 }
 
-async function loadContacts() {
+async function load() {
+  setSyncState('syncing', 'Loading…');
   const { data, error } = await db.from('contacts').select('*').order('bank').order('last_name');
-  if (error) { showToast('Failed to load contacts: ' + error.message, 'error'); return; }
-  allContacts = data || [];
+  if (error) { setSyncState('error', 'Error'); toast('Load error: ' + error.message, 'err'); return; }
+  all = data || [];
   updateKPIs();
   updateBankGrid();
   applyFilters();
-  document.getElementById('tableLoading').style.display = 'none';
-  document.getElementById('contactsTable').style.display = 'table';
+  document.getElementById('tLoad').style.display = 'none';
+  document.getElementById('tbl').style.display = 'table';
+  setSyncState('live', 'Live');
 }
 
-function subscribeRealtime() {
-  db.channel('contacts-changes')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'contacts' }, () => loadContacts())
-    .subscribe();
+function realtime() {
+  db.channel('crm').on('postgres_changes', { event: '*', schema: 'public', table: 'contacts' }, () => load()).subscribe();
 }
 
-// ─── KPIs ─────────────────────────────────────────────────────────────────────
+// ── KPIs ──────────────────────────────────────────────────────────────────────
 function updateKPIs() {
-  const total = allContacts.length;
-  const clients = allContacts.filter(c => c.category === 'CLIENTS').length;
-  const prospects = allContacts.filter(c => c.category === 'PROSPECT').length;
-  const replied = allContacts.filter(c => c.reply_status === 'Replied').length;
-  const rate = total ? Math.round(replied / total * 100) : 0;
-  const banks = [...new Set(allContacts.map(c => c.bank))].length;
+  const n = all.length;
+  const cl = all.filter(c => c.category === 'CLIENTS').length;
+  const pr = all.filter(c => c.category === 'PROSPECT').length;
+  const re = all.filter(c => c.reply_status === 'Replied').length;
+  const rt = n ? Math.round(re / n * 100) : 0;
+  const bk = new Set(all.map(c => c.bank)).size;
 
-  document.getElementById('kpiTotal').textContent = total;
-  document.getElementById('kpiClients').textContent = clients;
-  document.getElementById('kpiProspects').textContent = prospects;
-  document.getElementById('kpiReplyRate').textContent = rate + '%';
-  document.getElementById('kpiRepliedCount').textContent = `${replied} replied`;
-  document.getElementById('kpiBanks').textContent = banks;
-  document.getElementById('kpiBar').style.width = rate + '%';
+  set('k0', n); set('k1', cl); set('k2', pr);
+  set('k3', rt + '%');
+  set('k3sub', re + ' replied');
+  set('k4', bk);
+  document.getElementById('kbar').style.width = rt + '%';
 }
 
-// ─── BANK GRID ────────────────────────────────────────────────────────────────
+// ── BANK GRID ─────────────────────────────────────────────────────────────────
 function updateBankGrid() {
-  const bankMap = {};
-  allContacts.forEach(c => {
-    if (!bankMap[c.bank]) bankMap[c.bank] = { total: 0, replied: 0, category: c.category };
-    bankMap[c.bank].total++;
-    if (c.reply_status === 'Replied') bankMap[c.bank].replied++;
-  });
-
-  const sorted = Object.entries(bankMap).sort((a, b) => b[1].total - a[1].total);
-  const grid = document.getElementById('bankGrid');
-  grid.innerHTML = sorted.map(([bank, s]) => `
-    <div class="bank-card ${bankFilter === bank ? 'active' : ''}" onclick="toggleBankFilter('${escHtml(bank)}')">
-      <div class="bank-name">${escHtml(bank)}</div>
-      <div class="bank-stats">
-        <span>${s.total} contact${s.total > 1 ? 's' : ''}</span>
-        ${s.replied ? `<span>· ${s.replied} replied</span>` : ''}
-      </div>
-    </div>
-  `).join('');
+  const m = {};
+  all.forEach(c => { m[c.bank] = (m[c.bank] || 0) + 1; });
+  const sorted = Object.entries(m).sort((a,b) => b[1]-a[1]);
+  document.getElementById('bankGrid').innerHTML = sorted.map(([b,n]) =>
+    `<div class="bank-chip ${bankF===b?'active':''}" onclick="toggleBank('${esc(b)}')">${esc(b)} <span class="bcount">${n}</span></div>`
+  ).join('');
 }
 
-function toggleBankFilter(bank) {
-  bankFilter = bankFilter === bank ? '' : bank;
-  document.getElementById('filterBank').value = bankFilter;
+function toggleBank(b) {
+  bankF = bankF === b ? '' : b;
+  document.getElementById('fBank').value = bankF;
   updateBankGrid();
-  applyFilters();
+  pg = 1; applyFilters();
 }
 
-// ─── FILTERS ─────────────────────────────────────────────────────────────────
+// ── FILTERS ───────────────────────────────────────────────────────────────────
 function setupFilters() {
-  const banks = [...new Set(allContacts.map(c => c.bank))].sort();
-  const sel = document.getElementById('filterBank');
-  banks.forEach(b => {
-    const o = document.createElement('option');
-    o.value = b;
-    o.textContent = b;
-    sel.appendChild(o);
-  });
-
-  ['searchInput','filterCategory','filterClassification','filterStatus','filterBank'].forEach(id => {
+  const bks = [...new Set(all.map(c=>c.bank))].sort();
+  const sel = document.getElementById('fBank');
+  bks.forEach(b => { const o = document.createElement('option'); o.value = b; o.textContent = b; sel.appendChild(o); });
+  ['q','fCat','fCls','fSt','fBank'].forEach(id => {
     const el = document.getElementById(id);
-    el.addEventListener('input', () => { page = 1; applyFilters(); });
-    el.addEventListener('change', () => { page = 1; applyFilters(); });
+    el.addEventListener('input',  () => { pg=1; applyFilters(); });
+    el.addEventListener('change', () => { pg=1; applyFilters(); });
   });
 }
 
 function applyFilters() {
-  const q = document.getElementById('searchInput').value.toLowerCase();
-  const cat = document.getElementById('filterCategory').value;
-  const cls = document.getElementById('filterClassification').value;
-  const st = document.getElementById('filterStatus').value;
-  const bk = document.getElementById('filterBank').value || bankFilter;
+  const q   = document.getElementById('q').value.toLowerCase();
+  const cat = document.getElementById('fCat').value;
+  const cls = document.getElementById('fCls').value;
+  const st  = document.getElementById('fSt').value;
+  const bk  = document.getElementById('fBank').value || bankF;
 
-  filtered = allContacts.filter(c => {
-    if (cat && c.category !== cat) return false;
+  filtered = all.filter(c => {
+    if (cat && c.category !== cat)       return false;
     if (cls && c.classification !== cls) return false;
-    if (st && c.reply_status !== st) return false;
-    if (bk && c.bank !== bk) return false;
+    if (st  && c.reply_status !== st)    return false;
+    if (bk  && c.bank !== bk)           return false;
     if (q) {
-      const hay = `${c.first_name} ${c.last_name} ${c.bank} ${c.email} ${c.title_role || ''}`.toLowerCase();
-      if (!hay.includes(q)) return false;
+      const h = `${c.first_name} ${c.last_name||''} ${c.bank} ${c.email||''} ${c.title_role||''}`.toLowerCase();
+      if (!h.includes(q)) return false;
     }
     return true;
   });
-
   sortFiltered();
-  renderTable();
+  render();
 }
 
-function clearFilters() {
-  ['searchInput','filterCategory','filterClassification','filterStatus','filterBank'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
-  bankFilter = '';
-  page = 1;
+function clearF() {
+  ['q','fCat','fCls','fSt','fBank'].forEach(id => document.getElementById(id).value = '');
+  bankF = ''; pg = 1;
   updateBankGrid();
   applyFilters();
 }
 
-// ─── SORT ─────────────────────────────────────────────────────────────────────
-function sortBy(col) {
-  if (sortCol === col) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
-  else { sortCol = col; sortDir = 'asc'; }
-
+// ── SORT ──────────────────────────────────────────────────────────────────────
+function sort(col) {
+  if (sCol === col) sDir = sDir==='asc'?'desc':'asc';
+  else { sCol = col; sDir = 'asc'; }
   document.querySelectorAll('th').forEach(th => {
-    th.classList.remove('sort-asc', 'sort-desc');
-    if (th.getAttribute('onclick') === `sortBy('${col}')`) {
-      th.classList.add(sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
-    }
+    th.classList.remove('asc','desc');
+    if (th.getAttribute('onclick') === `sort('${col}')`) th.classList.add(sDir);
   });
-
-  sortFiltered();
-  renderTable();
+  sortFiltered(); render();
 }
 
 function sortFiltered() {
-  filtered.sort((a, b) => {
-    let va = a[sortCol] ?? '';
-    let vb = b[sortCol] ?? '';
-    if (typeof va === 'string') va = va.toLowerCase();
-    if (typeof vb === 'string') vb = vb.toLowerCase();
-    if (va < vb) return sortDir === 'asc' ? -1 : 1;
-    if (va > vb) return sortDir === 'asc' ? 1 : -1;
-    return 0;
+  filtered.sort((a,b) => {
+    let va = a[sCol] ?? '', vb = b[sCol] ?? '';
+    if (typeof va==='string') va = va.toLowerCase();
+    if (typeof vb==='string') vb = vb.toLowerCase();
+    return va < vb ? (sDir==='asc'?-1:1) : va > vb ? (sDir==='asc'?1:-1) : 0;
   });
 }
 
-// ─── TABLE RENDER ─────────────────────────────────────────────────────────────
-function renderTable() {
-  const body = document.getElementById('tableBody');
-  const empty = document.getElementById('tableEmpty');
-  const footer = document.getElementById('tableFooter');
-  const badge = document.getElementById('countBadge');
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function render() {
+  const tbody = document.getElementById('tbody');
+  const empty = document.getElementById('tEmpty');
+  const foot  = document.getElementById('tFoot');
+  document.getElementById('resBadge').textContent = filtered.length;
 
-  badge.textContent = filtered.length;
-
-  if (filtered.length === 0) {
-    document.getElementById('contactsTable').style.display = 'none';
+  if (!filtered.length) {
+    document.getElementById('tbl').style.display = 'none';
     empty.style.display = 'block';
-    footer.style.display = 'none';
+    foot.style.display = 'none';
     return;
   }
 
-  document.getElementById('contactsTable').style.display = 'table';
+  document.getElementById('tbl').style.display = 'table';
   empty.style.display = 'none';
-  footer.style.display = 'flex';
+  foot.style.display = 'flex';
 
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  if (page > totalPages) page = totalPages;
-  const start = (page - 1) * PAGE_SIZE;
-  const slice = filtered.slice(start, start + PAGE_SIZE);
+  const tot = Math.ceil(filtered.length / PG);
+  if (pg > tot) pg = tot;
+  const s = (pg-1)*PG;
+  const slice = filtered.slice(s, s+PG);
+  const now = Date.now();
 
-  body.innerHTML = slice.map(c => `
-    <tr onclick="editContact('${c.id}')">
-      <td><span class="bank-chip">${escHtml(c.bank)}</span></td>
-      <td class="td-name">${escHtml(c.first_name)} ${escHtml(c.last_name || '')}</td>
-      <td class="td-email"><a href="mailto:${escHtml(c.email || '')}" onclick="event.stopPropagation()">${escHtml(c.email || '—')}</a></td>
-      <td><span class="badge ${c.category === 'CLIENTS' ? 'badge-client' : 'badge-prospect'}">${c.category === 'CLIENTS' ? 'Client' : 'Prospect'}</span></td>
-      <td><span class="badge ${clsBadge(c.classification)}">${escHtml(c.classification || '—')}</span></td>
-      <td><span class="badge ${c.reply_status === 'Replied' ? 'badge-replied' : 'badge-no-reply'}">${c.reply_status}</span></td>
-      <td class="date-cell">${fmtDate(c.first_contact_date)}</td>
-      <td class="date-cell">${fmtDate(c.last_contact_date)}</td>
-      <td><span class="follow-up ${c.nb_follow_ups > 0 ? 'active' : ''}">${c.nb_follow_ups > 0 ? '↩ ' : ''}${c.nb_follow_ups}</span></td>
-    </tr>
-  `).join('');
+  tbody.innerHTML = slice.map(c => {
+    const inactive = inactiveDays(c, now);
+    return `<tr onclick="editContact('${c.id}')">
+      <td><span class="bank-tag">${esc(c.bank)}</span></td>
+      <td class="td-name">${esc(c.first_name)} ${esc(c.last_name||'')}</td>
+      <td class="td-email"><a href="mailto:${esc(c.email||'')}" onclick="event.stopPropagation()">${esc(c.email||'—')}</a></td>
+      <td><span class="badge ${c.category==='CLIENTS'?'b-client':'b-prospect'}">${c.category==='CLIENTS'?'Client':'Prospect'}</span></td>
+      <td><span class="badge ${clsBadge(c.classification)}">${esc(c.classification||'—')}</span></td>
+      <td><span class="badge ${c.reply_status==='Replied'?'b-replied':'b-noreply'}">${c.reply_status==='Replied'?'✓ Replied':'○ No Reply'}</span></td>
+      <td class="td-date">${fmtD(c.first_contact_date)}</td>
+      <td class="td-date">${fmtD(c.last_contact_date)}</td>
+      <td><span class="fup ${c.nb_follow_ups>0?'has':''}">${c.nb_follow_ups>0?'↩ ':''}${c.nb_follow_ups}</span></td>
+      <td>${renderInactive(inactive, c)}</td>
+      <td class="td-notes" title="${esc(c.notes||'')}">${esc(c.notes||'')}</td>
+    </tr>`;
+  }).join('');
 
   // Pagination
-  document.getElementById('pageInfo').textContent = `${start + 1}–${Math.min(start + PAGE_SIZE, filtered.length)} of ${filtered.length}`;
+  set('pInfo', `${s+1}–${Math.min(s+PG, filtered.length)} of ${filtered.length}`);
 
-  const btns = document.getElementById('pageBtns');
-  btns.innerHTML = '';
-
-  const prev = document.createElement('button');
-  prev.className = 'page-btn';
-  prev.textContent = '← Prev';
-  prev.disabled = page <= 1;
-  prev.onclick = () => { page--; renderTable(); };
-  btns.appendChild(prev);
-
-  for (let i = Math.max(1, page - 2); i <= Math.min(totalPages, page + 2); i++) {
-    const btn = document.createElement('button');
-    btn.className = 'page-btn' + (i === page ? ' active' : '');
-    btn.textContent = i;
-    const _i = i;
-    btn.onclick = () => { page = _i; renderTable(); };
-    btns.appendChild(btn);
-  }
-
-  const next = document.createElement('button');
-  next.className = 'page-btn';
-  next.textContent = 'Next →';
-  next.disabled = page >= totalPages;
-  next.onclick = () => { page++; renderTable(); };
-  btns.appendChild(next);
+  const pBtns = document.getElementById('pBtns');
+  pBtns.innerHTML = '';
+  const mk = (label, page, cls='') => {
+    const b = document.createElement('button');
+    b.className = 'pbtn ' + cls;
+    b.textContent = label;
+    b.disabled = (label==='← Prev' && page<1) || (label==='Next →' && page>tot);
+    b.onclick = () => { pg = page; render(); };
+    pBtns.appendChild(b);
+  };
+  mk('← Prev', pg-1);
+  for (let i=Math.max(1,pg-2); i<=Math.min(tot,pg+2); i++) mk(i, i, i===pg?'cur':'');
+  mk('Next →', pg+1);
 }
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function inactiveDays(c, now) {
+  if (c.reply_status === 'Replied') return null;
+  const d = c.last_contact_date || c.first_contact_date;
+  if (!d) return null;
+  return Math.floor((now - new Date(d).getTime()) / 86400000);
 }
 
-function fmtDate(d) {
+function renderInactive(days, c) {
+  if (c.reply_status === 'Replied') return '<span class="inactive-ok">—</span>';
+  if (days === null) return '<span class="inactive-ok">—</span>';
+  if (days > 60) return `<span class="inactive-badge inactive-hot">+${days}d</span>`;
+  if (days > 21) return `<span class="inactive-badge inactive-warm">${days}d</span>`;
+  return `<span class="inactive-ok">${days}d</span>`;
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const set = (id, v) => document.getElementById(id).textContent = v;
+
+function fmtD(d) {
   if (!d) return '—';
-  const [y,m,day] = d.split('-');
-  return `${day}/${m}/${y.slice(2)}`;
+  const [y,m,dd] = d.split('-');
+  return `${dd}/${m}/${y.slice(2)}`;
 }
 
-function clsBadge(cls) {
-  if (cls === 'Equities') return 'badge-equities';
-  if (cls === 'Fixed Income') return 'badge-fixed';
-  return 'badge-both';
+function clsBadge(c) {
+  if (c==='Equities')    return 'b-eq';
+  if (c==='Fixed Income') return 'b-fi';
+  return 'b-both';
 }
 
-function showToast(msg, type = '') {
-  const c = document.getElementById('toastContainer');
+function setSyncState(state, label) {
+  const dot = document.getElementById('syncDot');
+  dot.className = 'sync-dot' + (state==='live'?'':' '+state);
+  document.getElementById('syncLabel').textContent = label;
+}
+
+function toast(msg, type='') {
+  const c = document.getElementById('toasts');
   const t = document.createElement('div');
   t.className = 'toast ' + type;
   t.textContent = msg;
   c.appendChild(t);
-  setTimeout(() => t.remove(), 3500);
+  setTimeout(() => t.remove(), 3200);
 }
 
-// ─── MODAL ───────────────────────────────────────────────────────────────────
-function openModal(contact = null) {
-  document.getElementById('fieldId').value = contact?.id || '';
-  document.getElementById('fieldFirstName').value = contact?.first_name || '';
-  document.getElementById('fieldLastName').value = contact?.last_name || '';
-  document.getElementById('fieldBank').value = contact?.bank || '';
-  document.getElementById('fieldCategory').value = contact?.category || 'CLIENTS';
-  document.getElementById('fieldEmail').value = contact?.email || '';
-  document.getElementById('fieldTitle').value = contact?.title_role || '';
-  document.getElementById('fieldClassification').value = contact?.classification || 'Both';
-  document.getElementById('fieldFirstContact').value = contact?.first_contact_date || '';
-  document.getElementById('fieldLastContact').value = contact?.last_contact_date || '';
-  document.getElementById('fieldFollowUps').value = contact?.nb_follow_ups ?? 0;
-  document.getElementById('fieldReplyStatus').value = contact?.reply_status || 'No Reply';
-  document.getElementById('fieldNotes').value = contact?.notes || '';
+// ── MODAL ─────────────────────────────────────────────────────────────────────
+function openModal(c=null) {
+  document.getElementById('fId').value   = c?.id || '';
+  document.getElementById('fFN').value   = c?.first_name || '';
+  document.getElementById('fLN').value   = c?.last_name || '';
+  document.getElementById('fBk').value   = c?.bank || '';
+  document.getElementById('fCat2').value = c?.category || 'CLIENTS';
+  document.getElementById('fEm').value   = c?.email || '';
+  document.getElementById('fTi').value   = c?.title_role || '';
+  document.getElementById('fCl').value   = c?.classification || 'Both';
+  document.getElementById('fFC').value   = c?.first_contact_date || '';
+  document.getElementById('fLC').value   = c?.last_contact_date || '';
+  document.getElementById('fFU').value   = c?.nb_follow_ups ?? 0;
+  document.getElementById('fRS').value   = c?.reply_status || 'No Reply';
+  document.getElementById('fNo').value   = c?.notes || '';
 
-  const isEdit = !!contact;
-  document.getElementById('modalTitle').textContent = isEdit ? 'Edit Contact' : 'Add Contact';
-  document.getElementById('modalSubtitle').textContent = isEdit
-    ? `${contact.first_name} ${contact.last_name || ''} · ${contact.bank}`
-    : 'New entry';
-  document.getElementById('btnDelete').style.display = isEdit ? 'block' : 'none';
-
-  document.getElementById('modalOverlay').classList.add('open');
+  const isEdit = !!c;
+  set('mtitle', isEdit ? 'Edit Contact' : 'Add Contact');
+  set('msub',   isEdit ? `${c.first_name} ${c.last_name||''} · ${c.bank}` : 'New entry');
+  document.getElementById('btnDel').style.display = isEdit ? 'block' : 'none';
+  document.getElementById('overlay').classList.add('open');
 }
 
-function closeModal() {
-  document.getElementById('modalOverlay').classList.remove('open');
-}
+function closeModal() { document.getElementById('overlay').classList.remove('open'); }
 
-function editContact(id) {
-  const c = allContacts.find(x => x.id === id);
-  if (c) openModal(c);
-}
+function editContact(id) { const c = all.find(x=>x.id===id); if(c) openModal(c); }
 
 async function saveContact() {
-  const id = document.getElementById('fieldId').value;
-  const payload = {
-    first_name: document.getElementById('fieldFirstName').value.trim(),
-    last_name: document.getElementById('fieldLastName').value.trim(),
-    bank: document.getElementById('fieldBank').value.trim(),
-    category: document.getElementById('fieldCategory').value,
-    email: document.getElementById('fieldEmail').value.trim() || null,
-    title_role: document.getElementById('fieldTitle').value.trim() || null,
-    classification: document.getElementById('fieldClassification').value,
-    first_contact_date: document.getElementById('fieldFirstContact').value || null,
-    last_contact_date: document.getElementById('fieldLastContact').value || null,
-    nb_follow_ups: parseInt(document.getElementById('fieldFollowUps').value) || 0,
-    reply_status: document.getElementById('fieldReplyStatus').value,
-    notes: document.getElementById('fieldNotes').value.trim() || null,
+  const id = document.getElementById('fId').value;
+  const p = {
+    first_name:        document.getElementById('fFN').value.trim(),
+    last_name:         document.getElementById('fLN').value.trim(),
+    bank:              document.getElementById('fBk').value.trim(),
+    category:          document.getElementById('fCat2').value,
+    email:             document.getElementById('fEm').value.trim() || null,
+    title_role:        document.getElementById('fTi').value.trim() || null,
+    classification:    document.getElementById('fCl').value,
+    first_contact_date:document.getElementById('fFC').value || null,
+    last_contact_date: document.getElementById('fLC').value || null,
+    nb_follow_ups:     parseInt(document.getElementById('fFU').value) || 0,
+    reply_status:      document.getElementById('fRS').value,
+    notes:             document.getElementById('fNo').value.trim() || null,
   };
+  if (!p.first_name || !p.bank) { toast('First name and bank required.', 'err'); return; }
 
-  if (!payload.first_name || !payload.bank) {
-    showToast('First name and bank are required.', 'error');
-    return;
-  }
+  const { error } = id
+    ? await db.from('contacts').update(p).eq('id', id)
+    : await db.from('contacts').insert(p);
 
-  let error;
-  if (id) {
-    ({ error } = await db.from('contacts').update(payload).eq('id', id));
-  } else {
-    ({ error } = await db.from('contacts').insert(payload));
-  }
-
-  if (error) { showToast('Error: ' + error.message, 'error'); return; }
-
-  showToast(id ? 'Contact updated.' : 'Contact added.', 'success');
+  if (error) { toast('Error: ' + error.message, 'err'); return; }
+  toast(id ? 'Contact updated.' : 'Contact added.', 'ok');
   closeModal();
-  await loadContacts();
+  await load();
 }
 
-async function deleteContact() {
-  const id = document.getElementById('fieldId').value;
-  if (!id) return;
-  if (!confirm('Delete this contact?')) return;
-
+async function delContact() {
+  const id = document.getElementById('fId').value;
+  if (!id || !confirm('Delete this contact?')) return;
   const { error } = await db.from('contacts').delete().eq('id', id);
-  if (error) { showToast('Error: ' + error.message, 'error'); return; }
-  showToast('Contact deleted.', 'success');
+  if (error) { toast('Error: ' + error.message, 'err'); return; }
+  toast('Deleted.', 'ok');
   closeModal();
-  await loadContacts();
+  await load();
 }
 
-// Click outside modal to close
-document.getElementById('modalOverlay').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
-
-// Keyboard
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeModal();
-});
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeModal(); });
 
 init();
 </script>
