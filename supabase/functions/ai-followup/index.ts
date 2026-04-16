@@ -35,16 +35,19 @@ Contact profile:
 - Days since last contact: ${days_inactive !== null ? days_inactive + ' days' : 'unknown'}
 - Notes: ${contact.notes || 'none'}
 
-Write a short, sharp follow-up email body (3-4 sentences max) from Remy to re-engage this contact. Rules:
-- No "Dear X" or subject line — just the body
-- Specific to their bank and focus (${contact.classification})
-- Reference context from notes if available
-- Offer concrete value: candidates, market intelligence, network
-- Natural and personal tone, NOT a template
-- End with a soft call to action (call, coffee, reply)
-- Write in English
+Write a short, sharp follow-up email body (3-4 sentences max) from Remy to re-engage this contact.
 
-Reply with ONLY the email body.`;
+Rules:
+No greeting, no "Dear X", no subject line. Just the body, starting directly with the first sentence.
+Write in full natural sentences only. Zero bullet points, zero dashes, zero lists, zero hyphens used as separators.
+Be specific to their bank and focus area (${contact.classification}).
+Reference context from the notes if available, but don't make it obvious you're reading a file.
+Offer something concrete: a candidate profile, market intelligence, a connection, an insight.
+Warm and human tone, like a message from someone who genuinely knows them.
+End with one soft call to action (a call, coffee, or quick reply).
+Write in English.
+
+Reply with ONLY the email body. No subject, no sign-off, no "Best regards", nothing else.`;
 
     } else if (action === 'analyze') {
       prompt = `You are an AI assistant for Remy Vandenhende at Pinpoint Partners (executive search, capital markets).
@@ -63,7 +66,7 @@ Analyze this email and reply with a JSON object (no markdown, pure JSON):
   "sentiment": "positive|neutral|negative|interested|not_interested",
   "key_points": ["point 1", "point 2"],
   "suggested_action": "what Remy should do next",
-  "suggested_reply": "short reply email body (3-4 sentences, no Dear/subject)",
+  "suggested_reply": "short reply email body (3-4 sentences). Start directly with the first sentence, no greeting, no Dear, no subject line, no sign-off. Write in full natural sentences only, zero bullet points, zero dashes, zero lists. Warm and human tone.",
   "update_reply_status": true or false,
   "urgency": "high|medium|low"
 }`;
