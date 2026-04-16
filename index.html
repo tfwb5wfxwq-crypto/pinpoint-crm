@@ -115,50 +115,56 @@ header {
 /* ── MAIN ── */
 main { max-width: 1440px; margin: 0 auto; padding: 24px 28px; }
 
-/* ── KPIs ── */
-.kpi-row {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
-  margin-bottom: 20px;
+/* ── STATS STRIP ── */
+.stats-strip {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
 }
 
-.kpi {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: 16px 18px 14px;
-  box-shadow: var(--shadow);
-  position: relative;
-  overflow: hidden;
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 0 28px 0 0;
+  margin-right: 28px;
+  border-right: 1px solid var(--border);
 }
 
-.kpi-accent { border-top: 3px solid var(--navy); }
-.kpi-gold   { border-top: 3px solid var(--gold); }
+.stat:last-child { border-right: none; padding-right: 0; margin-right: 0; }
 
-.kpi-label {
-  font-size: 11px; font-weight: 600;
-  color: var(--text-3);
-  text-transform: uppercase;
-  letter-spacing: 0.7px;
-  margin-bottom: 8px;
-}
-
-.kpi-val {
-  font-size: 30px; font-weight: 800;
+.stat-val {
+  font-size: 26px;
+  font-weight: 700;
   color: var(--text);
-  letter-spacing: -1.5px;
+  letter-spacing: -1px;
   line-height: 1;
 }
 
-.kpi-accent .kpi-val { color: var(--navy); }
-.kpi-gold   .kpi-val { color: var(--gold); }
+.stat-val.gold { color: var(--gold); }
 
-.kpi-sub { font-size: 11px; color: var(--text-3); margin-top: 5px; }
+.stat-label {
+  font-size: 11px;
+  color: var(--text-3);
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
 
-.kpi-progress {
-  position: absolute; bottom: 0; left: 0; height: 3px;
-  background: linear-gradient(90deg, var(--gold), #E8B800);
+.stat-bar {
+  height: 2px;
+  background: var(--border);
+  border-radius: 1px;
+  margin-top: 4px;
+  overflow: hidden;
+}
+
+.stat-bar-fill {
+  height: 100%;
+  background: var(--gold);
+  border-radius: 1px;
   transition: width 1s ease;
 }
 
@@ -506,33 +512,28 @@ label { font-size: 11px; font-weight: 700; color: var(--text-3); text-transform:
 
 <main>
 
-  <!-- KPIs -->
-  <div class="kpi-row">
-    <div class="kpi kpi-accent">
-      <div class="kpi-label">Total Contacts</div>
-      <div class="kpi-val" id="k0">—</div>
-      <div class="kpi-sub">in database</div>
+  <!-- Stats strip -->
+  <div class="stats-strip">
+    <div class="stat">
+      <div class="stat-val" id="k0">—</div>
+      <div class="stat-label">contacts</div>
     </div>
-    <div class="kpi">
-      <div class="kpi-label">Clients</div>
-      <div class="kpi-val" id="k1">—</div>
-      <div class="kpi-sub">active relationships</div>
+    <div class="stat">
+      <div class="stat-val" id="k1">—</div>
+      <div class="stat-label">clients</div>
     </div>
-    <div class="kpi">
-      <div class="kpi-label">Prospects</div>
-      <div class="kpi-val" id="k2">—</div>
-      <div class="kpi-sub">to convert</div>
+    <div class="stat">
+      <div class="stat-val" id="k2">—</div>
+      <div class="stat-label">prospects</div>
     </div>
-    <div class="kpi kpi-gold">
-      <div class="kpi-label">Reply Rate</div>
-      <div class="kpi-val" id="k3">—</div>
-      <div class="kpi-sub" id="k3sub">replied</div>
-      <div class="kpi-progress" id="kbar" style="width:0%"></div>
+    <div class="stat">
+      <div class="stat-val gold" id="k3">—</div>
+      <div class="stat-label" id="k3sub">reply rate</div>
+      <div class="stat-bar"><div class="stat-bar-fill" id="kbar" style="width:0%"></div></div>
     </div>
-    <div class="kpi">
-      <div class="kpi-label">Banks</div>
-      <div class="kpi-val" id="k4">—</div>
-      <div class="kpi-sub">institutions covered</div>
+    <div class="stat">
+      <div class="stat-val" id="k4">—</div>
+      <div class="stat-label">banks</div>
     </div>
   </div>
 
