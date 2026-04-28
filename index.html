@@ -8,72 +8,6 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ── LOGIN ── */
-#loginScreen {
-  position: fixed; inset: 0; z-index: 9999;
-  background: #0E1629;
-  display: flex; align-items: center; justify-content: center;
-}
-.login-box {
-  width: 100%; max-width: 360px;
-  padding: 0 20px;
-  display: flex; flex-direction: column; align-items: center;
-  gap: 0;
-}
-.login-mark {
-  width: 48px; height: 48px;
-  background: #B8940A;
-  border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 800; font-size: 18px; color: #fff;
-  letter-spacing: -0.5px;
-  margin-bottom: 20px;
-}
-.login-title {
-  font-size: 20px; font-weight: 700; color: #fff;
-  letter-spacing: -0.4px; margin-bottom: 4px;
-}
-.login-sub {
-  font-size: 12px; color: rgba(255,255,255,0.35);
-  margin-bottom: 32px; letter-spacing: 0.2px;
-}
-.login-field {
-  width: 100%; position: relative; margin-bottom: 12px;
-}
-.login-input {
-  width: 100%;
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 8px;
-  padding: 12px 44px 12px 14px;
-  color: #fff; font-size: 14px;
-  outline: none; font-family: inherit;
-  transition: border-color .15s;
-  letter-spacing: 2px;
-}
-.login-input::placeholder { letter-spacing: 0; color: rgba(255,255,255,0.25); }
-.login-input:focus { border-color: rgba(255,255,255,0.35); }
-.login-eye {
-  position: absolute; right: 13px; top: 50%; transform: translateY(-50%);
-  background: none; border: none; color: rgba(255,255,255,0.35);
-  cursor: pointer; font-size: 16px; padding: 2px;
-  transition: color .15s;
-}
-.login-eye:hover { color: rgba(255,255,255,0.7); }
-.login-btn {
-  width: 100%;
-  background: #B8940A; border: none;
-  color: #fff; border-radius: 8px;
-  padding: 13px; font-size: 14px; font-weight: 700;
-  cursor: pointer; transition: filter .15s;
-  margin-top: 4px;
-}
-.login-btn:hover { filter: brightness(1.1); }
-.login-error {
-  color: #F87171; font-size: 12px;
-  margin-top: 10px; text-align: center;
-  min-height: 18px;
-}
 
 :root {
   --bg:        #EEF1F8;
@@ -925,21 +859,6 @@ label { font-size: 11px; font-weight: 700; color: var(--text-3); text-transform:
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
-<div id="loginScreen">
-  <div class="login-box">
-    <div class="login-mark">PP</div>
-    <div class="login-title">Pinpoint Partners</div>
-    <div class="login-sub">Global Markets & Hedge Funds — CRM</div>
-    <div class="login-field">
-      <input class="login-input" id="loginPwd" type="password" placeholder="Password"
-        onkeydown="if(event.key==='Enter')doLogin()">
-      <button class="login-eye" onclick="togglePwd()" id="eyeBtn">👁</button>
-    </div>
-    <button class="login-btn" onclick="doLogin()">Access CRM</button>
-    <div class="login-error" id="loginErr"></div>
-  </div>
-</div>
 
 <header>
   <div class="logo">
@@ -1868,40 +1787,6 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeModal(); closeDrawer(); }
 });
 
-// ── LOGIN ─────────────────────────────────────────────────────────────────────
-// SHA-256 hash of "Pinpoint2026"
-const PWD_HASH = '3b6c141e579d6372ac60b476784a45630c2008d4ed6c2a79f2e9bb02100f1b90';
-
-async function sha256(str) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-}
-
-async function doLogin() {
-  const pwd = document.getElementById('loginPwd').value;
-  if (!pwd) return;
-  const hash = await sha256(pwd);
-  if (hash === PWD_HASH) {
-    sessionStorage.setItem('pp_auth', '1');
-    document.getElementById('loginScreen').style.display = 'none';
-  } else {
-    const err = document.getElementById('loginErr');
-    err.textContent = 'Incorrect password.';
-    document.getElementById('loginPwd').value = '';
-    document.getElementById('loginPwd').focus();
-    setTimeout(() => err.textContent = '', 2500);
-  }
-}
-
-function togglePwd() {
-  const inp = document.getElementById('loginPwd');
-  inp.type = inp.type === 'password' ? 'text' : 'password';
-}
-
-// Check session on load
-if (sessionStorage.getItem('pp_auth') === '1') {
-  document.getElementById('loginScreen').style.display = 'none';
-}
 
 // Live update of Outlook link as user edits draft
 document.getElementById('dEmailDraft').addEventListener('input', function() {
